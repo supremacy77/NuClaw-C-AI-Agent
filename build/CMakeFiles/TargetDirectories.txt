@@ -1,0 +1,3 @@
+/home/supremacy/AgentServer/build/CMakeFiles/server.dir
+/home/supremacy/AgentServer/build/CMakeFiles/edit_cache.dir
+/home/supremacy/AgentServer/build/CMakeFiles/rebuild_cache.dir
