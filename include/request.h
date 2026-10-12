@@ -1,5 +1,6 @@
-#include<string>
-#include<map>
+#pragma once
+#include <string>
+#include <map>
 
 struct Request {
     std::string method;//方法
