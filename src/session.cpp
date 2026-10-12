@@ -26,28 +26,15 @@ void Session::handle_request() {
         response_ = "HTTP/1.1 404 Not Found\r\nContent-Length: 0\r\n\r\n";
         // Handle 404 Not Found
     }
-    do_write(response_.size());
+    do_write();
 }
 
-void Session::on_read(const boost::system::error_code& ec, std::size_t length) {
-    if (ec) {
-        if (ec == asio::error::eof) {
-            std::cout << "Connection closed by client." << std::endl;
-        } else {
-            std::cerr << "Read error: " << ec.message() << std::endl;
-        }
-        return;
-    }
 
-    std::cout << "Received: " << std::string(buffer_, length) << std::endl;
-    do_write(length);
-}
-
-void Session::do_write(std::size_t length) {
+void Session::do_write() {
     auto self(shared_from_this());
-    asio::async_write(socket_, asio::buffer(buffer_, length),
-        [this, self](const boost::system::error_code& ec, std::size_t length) {
-            on_write(ec, length);
+    asio::async_write(socket_, asio::buffer(response_.c_str(), response_.size()),
+        [this, self](const boost::system::error_code& ec, std::size_t) {
+            on_write(ec, response_.size());
         });
 }
 

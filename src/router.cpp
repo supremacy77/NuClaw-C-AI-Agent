@@ -4,24 +4,18 @@
 #include <regex>
 
 
-void router::add_route(const std::string& method, const std::string& path, handler h) {
-    Router route;
-    route.method = method;
-    route.path = path;
-    route.h = h;
-
+void Router::add_route(const std::string& method, const std::string& path, handler h) {
+    std::vector<std::string> path_parts;
     std::istringstream stream(path);
     std::string part;
     while (std::getline(stream, part, '/')) {
-        if (!part.empty()) {
-            route.path_parts.push_back(part);
-        }
+        if (!part.empty()) path_parts.push_back(part);
     }
-
-    routes_.push_back(route);
+    routes_.push_back({method, path, h, path_parts});   // ✅ 聚合初始化，直接进容器
 }
 
-std::optional<RouteMatch> router::match(const std::string& method, const std::string& path) const {
+
+std::optional<RouteMatch> Router::match(const std::string& method, const std::string& path) const {
     for(const auto& route : routes_) {
         if (route.method != "*" && route.method != method) {
             continue;

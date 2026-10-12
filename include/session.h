@@ -22,9 +22,7 @@ public:
 private:
     void do_read();
 
-    void on_read(const boost::system::error_code& ec, std::size_t bytes_transferred);
-
-    void do_write(std::size_t length);
+    void do_write();
 
     void on_write(const boost::system::error_code& ec, std::size_t bytes_transferred);
 

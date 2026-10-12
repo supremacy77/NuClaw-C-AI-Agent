@@ -11,6 +11,7 @@ add_executable(server
     src/main.cpp
     src/server.cpp
     src/session.cpp
+    src/router.cpp
 )
 
 target_link_libraries(server
