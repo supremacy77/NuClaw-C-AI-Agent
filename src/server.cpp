@@ -6,7 +6,7 @@ void Server::do_accept() {
         [this](const boost::system::error_code& ec, tcp::socket socket) {
             if (!ec) {
                 std::cout << "New connection accepted." << std::endl;
-                std::make_shared<Session>(std::move(socket))->start(); 
+                std::make_shared<Session>(std::move(socket), router_)->start(); 
             } else {
                 std::cerr << "Accept error: " << ec.message() << std::endl;
             }

@@ -1,11 +1,32 @@
 #include "session.h"
+#include "router.h"
 
 void Session::do_read() {
     auto self(shared_from_this());
     socket_.async_read_some(asio::buffer(buffer_),
         [this, self](const boost::system::error_code& ec, std::size_t length) {
-            on_read(ec, length);
+            if (ec) {
+                return;
+            }
+
+            if (parser_.parse(buffer_, length, request_)) {
+                handle_request();
+            } else {
+                do_read();
+            }
         });
+}
+
+void Session::handle_request() {
+    auto match = router_.match(request_.method, request_.path);
+    if (match) {
+        response_ = match->h(request_);
+        // Send the response back to the client
+    } else {
+        response_ = "HTTP/1.1 404 Not Found\r\nContent-Length: 0\r\n\r\n";
+        // Handle 404 Not Found
+    }
+    do_write(response_.size());
 }
 
 void Session::on_read(const boost::system::error_code& ec, std::size_t length) {
@@ -36,5 +57,16 @@ void Session::on_write(const boost::system::error_code& ec, std::size_t length) 
         return;
     }
     std::cout << "Sent: " << std::string(buffer_, length) << std::endl;
-    do_read();
+
+    auto it = request_.headers.find("Connection");
+    if (it != request_.headers.end() && it->second == "close") {
+        std::cout << "Closing connection as per client request." << std::endl;
+        socket_.close();
+        return;
+    } else {
+        std::cout << "Waiting for next request..." << std::endl;
+        request_ = Request();
+        do_read();
+    }
+    
 }
