@@ -9,6 +9,13 @@
 
 using handler = std::function<std::string(const Request&)>;
 
+struct RouteMatch{
+    
+    handler h;
+    std::map<std::string, std::string> path_params; 
+};
+
+
 class Router {
 public:
     void add_route(const std::string& method, const std::string& path, handler h);
@@ -26,8 +33,3 @@ private:
     
 };
 
-struct RouteMatch{
-    
-    handler h;
-    std::map<std::string, std::string> path_params; 
-};
