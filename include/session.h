@@ -2,9 +2,9 @@
 #include <memory>
 #include <iostream>
 #include "httpparser.h"
+#include "request.h"
 
 class Router;
-struct Request;
 class HttpParser;
 
 namespace asio = boost::asio;
