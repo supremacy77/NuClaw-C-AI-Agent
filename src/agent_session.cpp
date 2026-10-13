@@ -25,12 +25,14 @@ void AgentSession::do_read() {
 void AgentSession::handle_chat(const Request& req) {
     std::string message = req.get_query_param("message");
     auto result = rule_engine_.recognize(message);
+    std::cout << "[debug] message=" << message
+              << " intent=" << (result ? result->intent : "NULL")
+              << " conf=" << (result ? result->confidence : 0.0f) << std::endl;
     std::string reply;
     if (result && result->confidence > 0.5f) {
         auto* intent = rule_engine_.find_intent(result->intent);
         if (intent && intent->handler) {
-            intent->handler(result->entities);
-            reply = "Intent recognized: " + result->intent;
+            reply = intent->handler(result->entities);
         } else {
             reply = "Intent recognized but no handler found.";
         }
