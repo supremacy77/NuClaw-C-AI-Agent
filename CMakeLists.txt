@@ -12,6 +12,8 @@ add_executable(server
     src/server.cpp
     src/session.cpp
     src/router.cpp
+    src/rule_engine.cpp
+    src/agent_session.cpp
 )
 
 target_link_libraries(server

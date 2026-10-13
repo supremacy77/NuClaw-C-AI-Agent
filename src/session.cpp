@@ -38,12 +38,12 @@ void Session::do_write() {
         });
 }
 
-void Session::on_write(const boost::system::error_code& ec, std::size_t length) {
+void Session::on_write(const boost::system::error_code& ec, std::size_t) {
     if (ec) {
         std::cerr << "Write error: " << ec.message() << std::endl;
         return;
     }
-    std::cout << "Sent: " << std::string(buffer_, length) << std::endl;
+    std::cout << "Sent: " << response_ << std::endl;
 
     auto it = request_.headers.find("Connection");
     if (it != request_.headers.end() && it->second == "close") {
