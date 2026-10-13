@@ -8,8 +8,9 @@
 #include <iostream>
 
 static std::string to_lower(const std::string& s) {
-    std::transform(s.begin(), s.end(), s.begin(), [](unsigned char c) { return std::tolower(c); });
-    return s;
+    std::string s_lower = s;
+    std::transform(s.begin(), s.end(), s_lower.begin(), [](unsigned char c) { return std::tolower(c); });
+    return s_lower;
 }
 
 static std::string escape_json(const std::string& s) {
@@ -117,4 +118,62 @@ void setup_intents(RuleEngine& engine) {
     engine.register_intent(weather_intent);
     engine.register_intent(time_intent);
     engine.register_intent(greeting_intent);
+}
+
+std::optional<IntentResult> RuleEngine::recognize(const std::string& input) {
+    float best_score = 0.0f;
+    const Intent* best_intent = nullptr;
+    std::map<std::string, std::string> best_entities;
+
+    for (const auto& intent : intents) {
+        float score = calculate_score(input, intent);
+        if (score > best_score) {
+            best_score = score;
+            best_intent = &intent;
+            best_entities = extract_entities(input, intent.entities);
+        }
+    }
+
+    if (best_intent) {
+        return IntentResult{best_intent->name, best_score, best_entities};
+    }
+    return std::nullopt;
+}
+
+
+float RuleEngine::calculate_score(const std::string& input, const Intent& intent) {
+    float score = 0.0f;
+    std::string lower_input = to_lower(input);
+    for (const auto& keyword : intent.keywords) {
+        if (lower_input.find(to_lower(keyword)) != std::string::npos) {
+            score += 1.0f;
+            if (lower_input == to_lower(keyword)) {
+                score += 0.5f;   // 完整匹配加权
+            }
+        }
+    }
+    return score;   // ✅ 直接返回命中数，不再除关键词数
+}
+
+
+std::map<std::string, std::string> RuleEngine::extract_entities(const std::string& input, const std::vector<Entity>& entities) {
+    std::map<std::string, std::string> extracted;
+
+    for (const auto& entity : entities) {
+        if (entity.type == "keyword_list") {
+            std::regex pattern("\\b(" + entity.pattern + ")\\b", std::regex_constants::icase);
+            std::smatch match;
+            if (std::regex_search(input, match, pattern)) {
+                extracted[entity.name] = match.str(1);
+            }
+        } else if (entity.type == "regex") {
+            std::regex pattern(entity.pattern, std::regex_constants::icase);
+            std::smatch match;
+            if (std::regex_search(input, match, pattern)) {
+                extracted[entity.name] = match.str(1);
+            }
+        }
+    }
+
+    return extracted;
 }
